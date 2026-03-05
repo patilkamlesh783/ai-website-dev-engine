@@ -26,14 +26,11 @@ function scan(dir){
    out+=scan(full)
   }
 
-  else if(file.endsWith(".js")){
-
+  else if(file.endsWith(".js") || file.endsWith(".ts") || file.endsWith(".tsx") || file.endsWith(".css") || file.endsWith(".md") || file.endsWith(".json")){
    const code=fs.readFileSync(full,"utf8")
-
    out+=`\nFILE: ${path.relative(ROOT,full)}\n`
    out+="========================================\n"
    out+=code+"\n"
-
   }
 
  })
@@ -50,4 +47,4 @@ content+=scan(SETUP_DIR)
 
 fs.writeFileSync(OUTPUT,content)
 
-console.log("Setup engine code exported")
+console.log("Setup engine code exported for full agency, portfolio, SaaS, and blog system")

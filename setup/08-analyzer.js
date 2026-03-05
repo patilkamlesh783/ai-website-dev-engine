@@ -12,7 +12,7 @@ function scan(dir){
 
  for(const f of files){
 
-  if(f==="node_modules") continue
+  if(f==="node_modules" || f===".git" || f==="dist" || f==="build" || f===".vite") continue
 
   const full=path.join(dir,f)
   const stat=fs.statSync(full)
@@ -41,10 +41,7 @@ scan(project)
 
 let report="EMPTY FILES\n"
 report+=empty.join("\n")
-
 report+="\n\nLARGE FILES\n"
 report+=largeFiles.join("\n")
-
 fs.writeFileSync(path.join(project,"docs","PROJECT_REPORT.md"),report)
-
-console.log("Project analyzed")
+console.log("Project analyzed for full agency, portfolio, SaaS, and blog system")

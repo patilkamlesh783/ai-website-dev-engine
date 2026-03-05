@@ -1,6 +1,34 @@
-# AI Setup Engine
+# AI Website Setup Engine
 
-Tool that automatically creates a **React + TypeScript project with architecture, components, documentation, and AI context tools.**
+## What does this project do?
+
+This engine automatically generates a complete, modern website project for:
+- Agencies
+- Portfolios
+- SaaS products
+- Blogs
+
+**Features:**
+- Creates a React + TypeScript project with Vite
+- Installs all UI, animation, SEO, and utility dependencies
+- Generates multi-page architecture (Home, About, Services, Team, Careers, Portfolio, Pricing, Projects, Blog, Contact, NotFound)
+- Builds beautiful, interactive, and responsive UI components (Navbar, Hero, Features, Testimonials, Pricing, Blog, About, Projects, Contact, CTA, Footer, Services, Team, Careers, Portfolio)
+- Sets up a complete CSS design system (global, layout, utility, animations, glassmorphism, gradients, etc.)
+- Adds SEO essentials (robots.txt, sitemap.xml, meta tags)
+- Creates documentation and AI context files for the project
+- Analyzes project for empty/large files and provides refactor suggestions
+- Adds a context command to generate a full project tree and source code summary
+- Verifies all required folders and files
+- Exports the setup engine source code for reference
+
+**How to use:**
+1. Run `node setup/run.js` and enter your project name.
+2. The engine builds everything automatically.
+3. Navigate to your new project folder and run `npm run dev` to start the site.
+4. Use `npm run context` to generate a full project context file.
+
+**Result:**
+You get a ready-to-use, scalable, beautiful website system for agencies, portfolios, SaaS, and blogs—no manual setup required.
 
 ---
 

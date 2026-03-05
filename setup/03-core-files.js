@@ -21,13 +21,20 @@ html=html.replace("/vite.svg","/logo.svg")
 
 html=html.replace(
 "<title>portfolio</title>",
-`<title>${project}</title>
-<meta name="description" content="${project} website"/>
-<meta name="robots" content="index,follow"/>
-<link rel="sitemap" type="application/xml" href="/sitemap.xml"/>
-`
-)
-
+`<title>${project} | Modern Portfolio, Agency & Blog</title>
+<meta name="description" content="${project} - Modern portfolio, agency, SaaS, and blog website. Beautiful UI, SEO, and scalable architecture.\"/>
+<meta name="keywords" content="portfolio, agency, SaaS, blog, react, modern, UI, SEO, web design, creative, team, services, careers, projects, pricing\"/>
+<meta name="robots" content="index,follow\"/>
+<meta name="author" content="${project}\"/>
+<meta property="og:title" content="${project} | Modern Portfolio, Agency & Blog\"/>
+<meta property="og:description" content="${project} - Modern portfolio, agency, SaaS, and blog website. Beautiful UI, SEO, and scalable architecture.\"/>
+<meta property="og:type" content="website\"/>
+<meta property="og:url" content="/\"/>
+<meta property="og:image" content="/logo.svg\"/>
+<link rel="sitemap" type="application/xml" href="/sitemap.xml\"/>
+<link rel="icon" type="image/svg+xml" href="/logo.svg\"/>
+<link rel="canonical" href="/\"/>
+`)
 fs.writeFileSync("index.html",html)
 
 /*
@@ -248,6 +255,10 @@ import Projects from "../pages/Projects"
 import Blog from "../pages/Blog"
 import Contact from "../pages/Contact"
 import NotFound from "../pages/NotFound"
+import Services from "../pages/Services"
+import Team from "../pages/Team"
+import Careers from "../pages/Careers"
+import Portfolio from "../pages/Portfolio"
 
 export default function AppRouter(){
 
@@ -270,6 +281,14 @@ export default function AppRouter(){
     <Route path="/blog" element={<Blog/>}/>
 
     <Route path="/contact" element={<Contact/>}/>
+
+    <Route path="/services" element={<Services/>}/>
+
+    <Route path="/team" element={<Team/>}/>
+
+    <Route path="/careers" element={<Careers/>}/>
+
+    <Route path="/portfolio" element={<Portfolio/>}/>
 
     <Route path="*" element={<NotFound/>}/>
 
@@ -348,8 +367,24 @@ fs.writeFileSync("public/sitemap.xml",`
 <loc>/contact</loc>
 </url>
 
+<url>
+<loc>/services</loc>
+</url>
+
+<url>
+<loc>/team</loc>
+</url>
+
+<url>
+<loc>/careers</loc>
+</url>
+
+<url>
+<loc>/portfolio</loc>
+</url>
+
 </urlset>
 
 `.trim())
 
-log("CORE","Full SaaS architecture created")
+log("CORE","Full agency, portfolio, SaaS, and blog architecture created")

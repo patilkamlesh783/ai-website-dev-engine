@@ -6,6 +6,20 @@ const project = process.argv[2]
 
 process.chdir(project)
 
-execSync(`npm install ${config.dependencies.join(" ")}`,{stdio:"inherit"})
+const extraDependencies = [
+  "framer-motion",
+  "react-helmet",
+  "styled-components",
+  "classnames",
+  "react-icons",
+  "@emotion/react",
+  "@emotion/styled",
+  "date-fns",
+  "uuid"
+]
 
-log("DEPENDENCIES","Dependencies installed")
+const allDeps = config.dependencies.concat(extraDependencies)
+
+execSync(`npm install ${allDeps.join(" ")}`, {stdio: "inherit"})
+
+log("DEPENDENCIES", "All dependencies installed (UI, animation, SEO, icons, utils)")

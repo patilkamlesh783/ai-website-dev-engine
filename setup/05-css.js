@@ -1006,6 +1006,133 @@ write("src/styles/blog-content.css",`
 
 `)
 
+/* =========================
+SERVICES
+========================= */
+write("src/styles/services.css",`
+.services {
+  max-width:1100px;
+  margin:auto;
+  text-align:center;
+}
+.services .card {
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  padding:30px;
+  box-shadow:var(--shadow-sm);
+  transition:.25s;
+}
+.services .card:hover {
+  box-shadow:var(--shadow-md);
+  transform:scale(1.04);
+}
+`)
+/* =========================
+TEAM
+========================= */
+write("src/styles/team.css",`
+.team {
+  max-width:1100px;
+  margin:auto;
+  text-align:center;
+}
+.team .card {
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  padding:30px;
+  box-shadow:var(--shadow-sm);
+  transition:.25s;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+}
+.team .avatar {
+  width:80px;
+  height:80px;
+  border-radius:50%;
+  margin-bottom:12px;
+  object-fit:cover;
+  box-shadow:var(--shadow-sm);
+}
+.team .card:hover {
+  box-shadow:var(--shadow-md);
+  transform:translateY(-5px);
+}
+`)
+/* =========================
+CAREERS
+========================= */
+write("src/styles/careers.css",`
+.careers {
+  max-width:900px;
+  margin:auto;
+  text-align:center;
+}
+.careers .card {
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  padding:30px;
+  box-shadow:var(--shadow-sm);
+  transition:.25s;
+}
+.careers .card:hover {
+  box-shadow:var(--shadow-md);
+  transform:scale(1.04);
+}
+.careers button {
+  margin-top:16px;
+  background:var(--primary);
+  color:white;
+  border:none;
+  border-radius:var(--radius);
+  padding:10px 24px;
+  font-weight:600;
+  cursor:pointer;
+  transition:.2s;
+}
+.careers button:hover {
+  background:var(--secondary);
+  transform:translateY(-2px);
+}
+`)
+/* =========================
+PORTFOLIO
+========================= */
+write("src/styles/portfolio.css",`
+.portfolio {
+  max-width:1100px;
+  margin:auto;
+  text-align:center;
+}
+.portfolio .image-card {
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  overflow:hidden;
+  box-shadow:var(--shadow-sm);
+  margin-bottom:20px;
+  transition:.3s;
+}
+.portfolio .image-card img {
+  width:100%;
+  height:180px;
+  object-fit:cover;
+  border-radius:var(--radius);
+  transition:.3s;
+}
+.portfolio .image-card:hover img {
+  transform:scale(1.08);
+}
+.portfolio .image-card h3 {
+  margin:12px 0 6px 0;
+  color:var(--primary);
+}
+.portfolio .image-card p {
+  color:var(--muted);
+}
+`)
 
-
-console.log("Full CSS design system generated")
+console.log("Full advanced CSS design system generated")
