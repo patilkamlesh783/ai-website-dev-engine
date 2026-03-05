@@ -13,37 +13,36 @@ rl.question(`Enter project name (default: ${config.defaultProjectName}): `,(name
 
  const project=name && name.trim()?name.trim():config.defaultProjectName
 
- if(!fs.existsSync(project)){
-
-  console.log("Creating project:",project)
-
-  execSync(`npm create vite@latest ${project} -- --template react-ts`,{stdio:"inherit"})
-
-  execSync(`cd ${project} && npm install`,{stdio:"inherit"})
-
- }else{
-
-  console.log("Project exists. Skipping creation.")
-
+ try {
+   if(!fs.existsSync(project)){
+    console.log("Creating project:",project)
+    execSync(`npm create vite@latest ${project} -- --template react-ts`,{stdio:"inherit"})
+    execSync(`cd ${project} && npm install`,{stdio:"inherit"})
+   }else{
+    console.log("Project exists. Skipping creation.")
+   }
+ } catch (err) {
+   console.error("Error creating or installing project:", err.message)
+   rl.close()
+   process.exit(1)
  }
 
  const scripts=fs.readdirSync(__dirname)
- .filter(f=>/^\d+.*\.js$/.test(f))
- .sort()
+   .filter(f=>/^\d+.*\.js$/.test(f))
+   .sort()
 
  scripts.forEach(s=>{
   try{
    console.log("Running",s)
    execSync(`node ${path.join(__dirname,s)} ${project}`,{stdio:"inherit"})
   }catch(err){
-   console.error("Error running:",s)
+   console.error("Error running:",s, err.message)
   }
  })
 
  console.log("Setup complete")
  console.log(`cd ${project}`)
  console.log("npm run dev")
-
  rl.close()
 
 })

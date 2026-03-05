@@ -1,8 +1,14 @@
 const fs=require("fs")
 const project=process.argv[2]
 
-if(!fs.existsSync(project+"/package.json")) throw new Error("package.json missing")
-if(!fs.existsSync(project+"/src")) throw new Error("src missing")
+if(!fs.existsSync(project+"/package.json")) {
+  console.error("package.json missing")
+  process.exit(1)
+}
+if(!fs.existsSync(project+"/src")) {
+  console.error("src missing")
+  process.exit(1)
+}
 
 const requiredFolders = [
   "src/pages",
@@ -19,6 +25,9 @@ const requiredFolders = [
   "src/animations"
 ]
 for(const folder of requiredFolders){
-  if(!fs.existsSync(project+"/"+folder)) throw new Error(`${folder} missing`)
+  if(!fs.existsSync(project+"/"+folder)) {
+    console.error(`${folder} missing`)
+    process.exit(1)
+  }
 }
 console.log("Project verified for full agency, portfolio, SaaS, and blog system")

@@ -1,0 +1,2761 @@
+AI SETUP ENGINE SOURCE CODE
+
+
+FILE: setup/01-structure.js
+========================================
+const fs = require("fs")
+const path = require("path")
+const config = require("./config")
+const {ensureDir} = require("./lib/context")
+const {log} = require("./lib/logger")
+
+const project = process.argv[2]
+
+process.chdir(project)
+
+config.structure.forEach(dir=>{
+ ensureDir(dir)
+})
+
+ensureDir("docs")
+
+// Ensure all folders required by verification
+const verifyFolders = [
+	"src/pages",
+	"src/components",
+	"src/styles",
+	"src/router",
+	"src/portfolio",
+	"src/services",
+	"src/team",
+	"src/careers",
+	"src/assets",
+	"src/data",
+	"src/graphics",
+	"src/animations"
+]
+verifyFolders.forEach(folder => {
+	ensureDir(folder)
+})
+
+const letter = project.charAt(0).toUpperCase()
+
+const svg = `
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+<circle cx="50" cy="50" r="45" fill="#6366f1"/>
+<text x="50%" y="55%" text-anchor="middle" font-size="50" fill="white" font-family="Arial" dy=".3em">${letter}</text>
+</svg>
+`
+
+fs.writeFileSync("public/logo.svg",svg)
+
+log("STRUCTURE","Architecture generated")
+
+FILE: setup/02-dependencies.js
+========================================
+const {execSync} = require("child_process")
+const config = require("./config")
+const {log} = require("./lib/logger")
+
+const project = process.argv[2]
+
+process.chdir(project)
+
+const extraDependencies = [
+  "framer-motion",
+  "react-helmet",
+  "styled-components",
+  "classnames",
+  "react-icons",
+  "@emotion/react",
+  "@emotion/styled",
+  "date-fns",
+  "uuid"
+]
+
+const allDeps = config.dependencies.concat(extraDependencies)
+
+execSync(`npm install ${allDeps.join(" ")}`, {stdio: "inherit"})
+
+log("DEPENDENCIES", "All dependencies installed (UI, animation, SEO, icons, utils)")
+
+FILE: setup/03-core-files.js
+========================================
+const fs = require("fs")
+const path = require("path")
+const {writeIfMissing, ensureDir} = require("./lib/context")
+const {log} = require("./lib/logger")
+
+const project = process.argv[2]
+
+process.chdir(project)
+
+/*
+Replace favicon
+*/
+
+if(fs.existsSync("public/vite.svg")){
+ fs.unlinkSync("public/vite.svg")
+}
+
+let html=fs.readFileSync("index.html","utf8")
+
+html=html.replace("/vite.svg","/logo.svg")
+
+html=html.replace(
+"<title>portfolio</title>",
+`<title>${project} | Modern Portfolio, Agency & Blog</title>
+<meta name="description" content="${project} - Modern portfolio, agency, SaaS, and blog website. Beautiful UI, SEO, and scalable architecture.\"/>
+<meta name="keywords" content="portfolio, agency, SaaS, blog, react, modern, UI, SEO, web design, creative, team, services, careers, projects, pricing\"/>
+<meta name="robots" content="index,follow\"/>
+<meta name="author" content="${project}\"/>
+<meta property="og:title" content="${project} | Modern Portfolio, Agency & Blog\"/>
+<meta property="og:description" content="${project} - Modern portfolio, agency, SaaS, and blog website. Beautiful UI, SEO, and scalable architecture.\"/>
+<meta property="og:type" content="website\"/>
+<meta property="og:url" content="/\"/>
+<meta property="og:image" content="/logo.svg\"/>
+<link rel="sitemap" type="application/xml" href="/sitemap.xml\"/>
+<link rel="icon" type="image/svg+xml" href="/logo.svg\"/>
+<link rel="canonical" href="/\"/>
+`)
+fs.writeFileSync("index.html",html)
+
+/*
+Ensure folders
+*/
+
+ensureDir("src/pages")
+ensureDir("src/router")
+ensureDir("src/components")
+ensureDir("src/styles")
+ensureDir("public")
+
+/*
+Remove default vite css
+*/
+
+if(fs.existsSync("src/index.css")){
+ fs.unlinkSync("src/index.css")
+}
+
+if(fs.existsSync("src/App.css")){
+ fs.unlinkSync("src/App.css")
+}
+
+/*
+Remove css import
+*/
+
+const mainFile="src/main.tsx"
+
+if(fs.existsSync(mainFile)){
+
+ let content=fs.readFileSync(mainFile,"utf8")
+
+ content=content.replace(`import './index.css'`,"")
+ content=content.replace(`import "./index.css"`,"")
+
+ fs.writeFileSync(mainFile,content)
+}
+
+/*
+Landing Page
+*/
+
+writeIfMissing("src/pages/Home.tsx",`
+import Hero from "../components/Hero/Hero"
+import Features from "../components/Features/Features"
+import Testimonials from "../components/Testimonials/Testimonials"
+import CTA from "../components/CTA/CTA"
+
+export default function Home(){
+
+ return(
+
+  <main>
+
+   <Hero/>
+
+   <Features/>
+
+   <Testimonials/>
+
+   <CTA/>
+
+  </main>
+
+ )
+
+}
+`)
+
+/*
+About
+*/
+
+writeIfMissing("src/pages/About.tsx",`
+import About from "../components/About/About"
+
+export default function AboutPage(){
+
+ return(
+
+  <main>
+
+   <About/>
+
+  </main>
+
+ )
+
+}
+`)
+
+/*
+Pricing
+*/
+
+writeIfMissing("src/pages/Pricing.tsx",`
+import Pricing from "../components/Pricing/Pricing"
+
+export default function PricingPage(){
+
+ return(
+
+  <main>
+
+   <Pricing/>
+
+  </main>
+
+ )
+
+}
+`)
+
+/*
+Projects
+*/
+
+writeIfMissing("src/pages/Projects.tsx",`
+import Projects from "../components/Projects/Projects"
+
+export default function ProjectsPage(){
+
+ return(
+
+  <main>
+
+   <Projects/>
+
+  </main>
+
+ )
+
+}
+`)
+
+/*
+Blog
+*/
+
+writeIfMissing("src/pages/Blog.tsx",`
+import Blog from "../components/Blog/Blog"
+
+export default function BlogPage(){
+
+ return(
+
+  <main>
+
+   <Blog/>
+
+  </main>
+
+ )
+
+}
+`)
+
+/*
+Contact
+*/
+
+writeIfMissing("src/pages/Contact.tsx",`
+import Contact from "../components/Contact/Contact"
+
+export default function ContactPage(){
+
+ return(
+
+  <main>
+
+   <Contact/>
+
+  </main>
+
+ )
+
+}
+`)
+
+/*
+404 Page
+*/
+
+writeIfMissing("src/pages/NotFound.tsx",`
+export default function NotFound(){
+
+ return(
+
+  <section>
+
+   <h1>404</h1>
+
+   <p>Page not found</p>
+
+  </section>
+
+ )
+
+}
+`)
+
+/*
+Router
+*/
+
+writeIfMissing("src/router/AppRouter.tsx",`
+import {BrowserRouter,Routes,Route} from "react-router-dom"
+
+import Navbar from "../components/Navbar/Navbar"
+import Footer from "../components/Footer/Footer"
+
+import Home from "../pages/Home"
+import About from "../pages/About"
+import Pricing from "../pages/Pricing"
+import Projects from "../pages/Projects"
+import Blog from "../pages/Blog"
+import Contact from "../pages/Contact"
+import NotFound from "../pages/NotFound"
+import Services from "../pages/Services"
+import Team from "../pages/Team"
+import Careers from "../pages/Careers"
+import Portfolio from "../pages/Portfolio"
+
+export default function AppRouter(){
+
+ return(
+
+  <BrowserRouter>
+
+   <Navbar/>
+
+   <Routes>
+
+    <Route path="/" element={<Home/>}/>
+
+    <Route path="/about" element={<About/>}/>
+
+    <Route path="/pricing" element={<Pricing/>}/>
+
+    <Route path="/projects" element={<Projects/>}/>
+
+    <Route path="/blog" element={<Blog/>}/>
+
+    <Route path="/contact" element={<Contact/>}/>
+
+    <Route path="/services" element={<Services/>}/>
+
+    <Route path="/team" element={<Team/>}/>
+
+    <Route path="/careers" element={<Careers/>}/>
+
+    <Route path="/portfolio" element={<Portfolio/>}/>
+
+    <Route path="*" element={<NotFound/>}/>
+
+   </Routes>
+
+   <Footer/>
+
+  </BrowserRouter>
+
+ )
+
+}
+`)
+
+/*
+App
+*/
+
+fs.writeFileSync("src/App.tsx",`
+
+import "./styles/global.css"
+import "./styles/layout.css"
+import "./styles/utils.css"
+import "./styles/animations.css"
+
+import AppRouter from "./router/AppRouter"
+
+function App(){
+
+ return <AppRouter/>
+
+}
+
+export default App
+
+`.trim())
+
+/*
+SEO files
+*/
+
+fs.writeFileSync("public/robots.txt",`
+
+User-agent: *
+Allow: /
+
+Sitemap: /sitemap.xml
+
+`.trim())
+
+fs.writeFileSync("public/sitemap.xml",`
+
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+
+<url>
+<loc>/</loc>
+</url>
+
+<url>
+<loc>/about</loc>
+</url>
+
+<url>
+<loc>/pricing</loc>
+</url>
+
+<url>
+<loc>/projects</loc>
+</url>
+
+<url>
+<loc>/blog</loc>
+</url>
+
+<url>
+<loc>/contact</loc>
+</url>
+
+<url>
+<loc>/services</loc>
+</url>
+
+<url>
+<loc>/team</loc>
+</url>
+
+<url>
+<loc>/careers</loc>
+</url>
+
+<url>
+<loc>/portfolio</loc>
+</url>
+
+</urlset>
+
+`.trim())
+
+log("CORE","Full agency, portfolio, SaaS, and blog architecture created")
+
+FILE: setup/04-components.js
+========================================
+const fs=require("fs")
+const path=require("path")
+
+const project=process.argv[2]
+
+process.chdir(project)
+
+const projectName=project.charAt(0).toUpperCase()+project.slice(1)
+
+function write(file,content){
+
+ const dir=path.dirname(file)
+
+ if(!fs.existsSync(dir)){
+  fs.mkdirSync(dir,{recursive:true})
+ }
+
+ if(!fs.existsSync(file)){
+  fs.writeFileSync(file,content.trim())
+ }
+
+}
+
+/* =========================
+NAVBAR
+========================= */
+
+write("src/components/Navbar/Navbar.tsx",`
+
+import {Link} from "react-router-dom"
+import "../../styles/navbar.css"
+
+export default function Navbar(){
+
+ return(
+
+  <header className="navbar">
+
+   <div className="logo">
+
+    <Link to="/">
+     ${projectName}
+    </Link>
+
+   </div>
+
+   <nav>
+
+    <Link to="/">Home</Link>
+
+    <Link to="/pricing">Pricing</Link>
+
+    <Link to="/projects">Projects</Link>
+
+    <Link to="/blog">Blog</Link>
+
+    <Link to="/about">About</Link>
+
+    <Link to="/contact">Contact</Link>
+
+   </nav>
+
+  </header>
+
+ )
+
+}
+
+`)
+
+/* =========================
+HERO
+========================= */
+
+write("src/components/Hero/Hero.tsx",`
+
+import "../../styles/hero.css"
+
+export default function Hero(){
+
+ return(
+
+  <section className="hero">
+
+   <div className="container">
+
+    <h1>
+
+     Build Portfolio, Agency & Blog Websites Instantly
+
+    </h1>
+
+    <p>
+
+     ${projectName} helps developers, freelancers and agencies launch complete websites with architecture, SEO and UI automatically.
+
+    </p>
+
+    <button>
+
+     Get Started
+
+    </button>
+
+   </div>
+
+  </section>
+
+ )
+
+}
+
+`)
+
+/* =========================
+FEATURES
+========================= */
+
+write("src/components/Features/Features.tsx",`
+
+import "../../styles/features.css"
+
+export default function Features(){
+
+ return(
+
+  <section className="features">
+
+   <div className="container">
+
+    <h2 className="center">
+
+     Powerful Features
+
+    </h2>
+
+    <div className="grid grid-3">
+
+     <div className="card">
+
+      <h3>AI Architecture</h3>
+
+      <p>
+
+       Automatically generates production-ready architecture with pages, components and SEO.
+
+      </p>
+
+     </div>
+
+     <div className="card">
+
+      <h3>Modern UI</h3>
+
+      <p>
+
+       Responsive layouts, animations and modern design patterns built in.
+
+      </p>
+
+     </div>
+
+     <div className="card">
+
+      <h3>Developer Ready</h3>
+
+      <p>
+
+       Clean folder structure with scalable components and routing.
+
+      </p>
+
+     </div>
+
+    </div>
+
+   </div>
+
+  </section>
+
+ )
+
+}
+
+`)
+
+/* =========================
+ABOUT
+========================= */
+
+write("src/components/About/About.tsx",`
+
+import "../../styles/about.css"
+
+export default function About(){
+
+ return(
+
+  <section className="about">
+
+   <div className="container">
+
+    <h2>
+
+     About ${projectName}
+
+    </h2>
+
+    <p>
+
+     ${projectName} is designed to generate modern portfolio websites, SaaS landing pages, agency websites and developer blogs instantly.
+
+    </p>
+
+    <p>
+
+     Instead of spending hours creating project architecture and UI, this engine builds the foundation automatically.
+
+    </p>
+
+   </div>
+
+  </section>
+
+ )
+
+}
+
+`)
+
+/* =========================
+PROJECTS
+========================= */
+
+write("src/components/Projects/Projects.tsx",`
+
+import "../../styles/projects.css"
+
+export default function Projects(){
+
+ return(
+
+  <section className="projects">
+
+   <div className="container">
+
+    <h2>
+
+     Projects & Case Studies
+
+    </h2>
+
+    <p>
+
+     Examples of websites generated with ${projectName}.
+
+    </p>
+
+    <div className="grid grid-3">
+
+     <div className="card">
+
+      <h3>Developer Portfolio</h3>
+
+      <p>
+
+       Personal brand website with blog and projects.
+
+      </p>
+
+     </div>
+
+     <div className="card">
+
+      <h3>Agency Website</h3>
+
+      <p>
+
+       Digital agency landing with services and pricing.
+
+      </p>
+
+     </div>
+
+     <div className="card">
+
+      <h3>SaaS Landing</h3>
+
+      <p>
+
+       Product marketing page with testimonials and pricing.
+
+      </p>
+
+     </div>
+
+    </div>
+
+   </div>
+
+  </section>
+
+ )
+
+}
+
+`)
+
+/* =========================
+CONTACT
+========================= */
+
+write("src/components/Contact/Contact.tsx",`
+
+import "../../styles/contact.css"
+
+export default function Contact(){
+
+ return(
+
+  <section className="contact">
+
+   <div className="container">
+
+    <h2>
+
+     Contact Us
+
+    </h2>
+
+    <p>
+
+     Lorem ipsum dolor sit amet consectetur adipiscing elit sed do eiusmod tempor.
+
+    </p>
+
+    <p>
+
+     Email: contact@${project}.com
+
+    </p>
+
+    <p>
+
+     Phone: +91 90000 00000
+
+    </p>
+
+   </div>
+
+  </section>
+
+ )
+
+}
+
+`)
+
+/* =========================
+CTA
+========================= */
+
+write("src/components/CTA/CTA.tsx",`
+
+import "../../styles/cta.css"
+
+export default function CTA(){
+
+ return(
+
+  <section className="cta">
+
+   <div className="container">
+
+    <h2>
+
+     Start Building Your Website Today
+
+    </h2>
+
+    <p>
+
+     Generate portfolio sites, agency websites and blogs automatically.
+
+    </p>
+
+    <button>
+
+     Launch Project
+
+    </button>
+
+   </div>
+
+  </section>
+
+ )
+
+}
+
+`)
+
+/* =========================
+FOOTER
+========================= */
+
+write("src/components/Footer/Footer.tsx",`
+
+import {Link} from "react-router-dom"
+import "../../styles/footer.css"
+
+export default function Footer(){
+
+ return(
+
+  <footer className="footer">
+
+   <div className="container">
+
+    <p>
+
+     © 2026 ${projectName}. All rights reserved.
+
+    </p>
+
+    <p>
+
+     <Link to="/about">About</Link> | 
+     <Link to="/blog">Blog</Link> | 
+     <Link to="/contact">Contact</Link>
+
+    </p>
+
+   </div>
+
+  </footer>
+
+ )
+
+}
+
+`)
+
+/* =========================
+SERVICES
+========================= */
+write("src/components/Services/Services.tsx",`
+import "../../styles/services.css"
+export default function Services(){
+ return(
+  <section className="services">
+   <div className="container">
+    <h2>Our Services</h2>
+    <div className="grid grid-3">
+     <div className="card">
+      <h3>Web Development</h3>
+      <p>Modern React, TypeScript, and scalable architecture for any business.</p>
+     </div>
+     <div className="card">
+      <h3>UI/UX Design</h3>
+      <p>Beautiful, interactive, and responsive design systems for web and mobile.</p>
+     </div>
+     <div className="card">
+      <h3>SEO & Analytics</h3>
+      <p>Advanced SEO, analytics, and conversion optimization for growth.</p>
+     </div>
+    </div>
+  </div>
+  </section>
+ )
+}
+`)
+/* =========================
+TEAM
+========================= */
+write("src/components/Team/Team.tsx",`
+import "../../styles/team.css"
+export default function Team(){
+ return(
+  <section className="team">
+   <div className="container">
+    <h2>Meet Our Team</h2>
+    <div className="grid grid-4">
+     <div className="card">
+      <img src="/assets/team1.jpg" alt="Team Member" className="avatar"/>
+      <h3>Alex Johnson</h3>
+      <p>Lead Developer</p>
+     </div>
+     <div className="card">
+      <img src="/assets/team2.jpg" alt="Team Member" className="avatar"/>
+      <h3>Sarah Lee</h3>
+      <p>UI/UX Designer</p>
+     </div>
+     <div className="card">
+      <img src="/assets/team3.jpg" alt="Team Member" className="avatar"/>
+      <h3>John Smith</h3>
+      <p>SEO Specialist</p>
+     </div>
+     <div className="card">
+      <img src="/assets/team4.jpg" alt="Team Member" className="avatar"/>
+      <h3>Priya Patel</h3>
+      <p>Project Manager</p>
+     </div>
+    </div>
+   </div>
+  </section>
+ )
+}
+`)
+/* =========================
+CAREERS
+========================= */
+write("src/components/Careers/Careers.tsx",`
+import "../../styles/careers.css"
+export default function Careers(){
+ return(
+  <section className="careers">
+   <div className="container">
+    <h2>Careers</h2>
+    <p>Join our creative team! We are always looking for talented developers, designers, and marketers.</p>
+    <div className="grid grid-2">
+     <div className="card">
+      <h3>Frontend Developer</h3>
+      <p>React, TypeScript, UI/UX, Animations</p>
+      <button>Apply Now</button>
+     </div>
+     <div className="card">
+      <h3>UI/UX Designer</h3>
+      <p>Figma, Web Design, Prototyping</p>
+      <button>Apply Now</button>
+     </div>
+    </div>
+   </div>
+  </section>
+ )
+}
+`)
+/* =========================
+PORTFOLIO
+========================= */
+write("src/components/Portfolio/Portfolio.tsx",`
+import "../../styles/portfolio.css"
+export default function Portfolio(){
+ return(
+  <section className="portfolio">
+   <div className="container">
+    <h2>Portfolio</h2>
+    <div className="grid grid-3">
+     <div className="image-card">
+      <img src="/assets/portfolio1.jpg" alt="Project 1"/>
+      <h3>Creative Galaxy</h3>
+      <p>Agency website with modern UI and SEO.</p>
+     </div>
+     <div className="image-card">
+      <img src="/assets/portfolio2.jpg" alt="Project 2"/>
+      <h3>Dev Portfolio</h3>
+      <p>Personal portfolio with blog and projects.</p>
+     </div>
+     <div className="image-card">
+      <img src="/assets/portfolio3.jpg" alt="Project 3"/>
+      <h3>SaaS Landing</h3>
+      <p>Product marketing page with testimonials and pricing.</p>
+     </div>
+    </div>
+   </div>
+  </section>
+ )
+}
+`)
+console.log("All advanced components created successfully")
+
+FILE: setup/04a-testimonials.js
+========================================
+const fs=require("fs")
+const path=require("path")
+
+const project=process.argv[2]
+process.chdir(project)
+
+function write(file,content){
+
+ const dir=path.dirname(file)
+
+ if(!fs.existsSync(dir)){
+  fs.mkdirSync(dir,{recursive:true})
+ }
+
+ if(!fs.existsSync(file)){
+  fs.writeFileSync(file,content.trim())
+ }
+
+}
+
+write("src/components/Testimonials/Testimonials.tsx",`
+import "../../styles/testimonials.css"
+
+export default function Testimonials(){
+ return(
+  <section className="testimonials">
+   <h2>What People Say</h2>
+
+   <div className="testimonials-grid">
+
+    <div className="testimonial">
+     <p>"Amazing platform to build products."</p>
+     <span>- Alex</span>
+    </div>
+
+    <div className="testimonial">
+     <p>"Saved weeks of development time."</p>
+     <span>- Sarah</span>
+    </div>
+
+    <div className="testimonial">
+     <p>"Clean architecture and AI ready."</p>
+     <span>- John</span>
+    </div>
+
+   </div>
+  </section>
+ )
+}
+`)
+
+console.log("Testimonials created")
+
+FILE: setup/04b-pricing.js
+========================================
+const fs=require("fs")
+const path=require("path")
+
+const project=process.argv[2]
+process.chdir(project)
+
+function write(file,content){
+
+ const dir=path.dirname(file)
+
+ if(!fs.existsSync(dir)){
+  fs.mkdirSync(dir,{recursive:true})
+ }
+
+ if(!fs.existsSync(file)){
+  fs.writeFileSync(file,content.trim())
+ }
+
+}
+
+write("src/components/Pricing/Pricing.tsx",`
+import "../../styles/pricing.css"
+
+export default function Pricing(){
+ return(
+  <section className="pricing">
+   <h2>Pricing</h2>
+
+   <div className="pricing-grid">
+
+    <div className="plan">
+     <h3>Starter</h3>
+     <p>$9/mo</p>
+     <button>Choose</button>
+    </div>
+
+    <div className="plan popular">
+     <h3>Pro</h3>
+     <p>$29/mo</p>
+     <button>Choose</button>
+    </div>
+
+    <div className="plan">
+     <h3>Enterprise</h3>
+     <p>$99/mo</p>
+     <button>Choose</button>
+    </div>
+
+   </div>
+  </section>
+ )
+}
+`)
+
+console.log("Pricing created")
+
+FILE: setup/04c-blog.js
+========================================
+const fs=require("fs")
+const path=require("path")
+
+const project=process.argv[2]
+process.chdir(project)
+
+function write(file,content){
+
+ const dir=path.dirname(file)
+
+ if(!fs.existsSync(dir)){
+  fs.mkdirSync(dir,{recursive:true})
+ }
+
+ if(!fs.existsSync(file)){
+  fs.writeFileSync(file,content.trim())
+ }
+
+}
+
+write("src/components/Blog/Blog.tsx",`
+import "../../styles/blog.css"
+
+export default function Blog(){
+ return(
+  <section className="blog">
+   <h2>Latest Articles</h2>
+
+   <div className="blog-grid">
+
+    <div className="post">
+     <h3>Building AI Dev Tools</h3>
+     <p>Lorem ipsum dolor sit amet.</p>
+    </div>
+
+    <div className="post">
+     <h3>Modern React Architecture</h3>
+     <p>Lorem ipsum dolor sit amet.</p>
+    </div>
+
+    <div className="post">
+     <h3>SaaS Landing Design</h3>
+     <p>Lorem ipsum dolor sit amet.</p>
+    </div>
+
+   </div>
+  </section>
+ )
+}
+`)
+
+console.log("Blog created")
+
+FILE: setup/05-css.js
+========================================
+const fs = require("fs")
+const path = require("path")
+const project = process.argv[2]
+
+process.chdir(project)
+
+function copyOrWrite(target, templatePath, fallbackContent) {
+  if (fs.existsSync(templatePath)) {
+    fs.copyFileSync(templatePath, target)
+  } else {
+    fs.writeFileSync(target, fallbackContent.trim())
+  }
+}
+
+/* =========================
+GLOBAL DESIGN SYSTEM
+========================= */
+
+copyOrWrite(
+  "src/styles/global.css",
+  path.resolve("../setup/templates/styles/global.css"),
+  `:root{ --bg1:#0f172a; --bg2:#1e293b; --text:#f1f5f9; --muted:#94a3b8; --primary:#6366f1; --secondary:#22c55e; --accent:#f59e0b; --card:#1e293b; --border:#334155; --radius:10px; --shadow-sm:0 4px 10px rgba(0,0,0,.25); --shadow-md:0 10px 30px rgba(0,0,0,.35); --shadow-lg:0 25px 60px rgba(0,0,0,.45);}*{margin:0;padding:0;box-sizing:border-box;}html{scroll-behavior:smooth;}body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu;background:radial-gradient(circle at top,#1e293b,#020617);color:var(--text);line-height:1.6;min-height:100vh;}h1{font-size:52px;margin-bottom:20px;}h2{font-size:36px;margin-bottom:20px;}h3{font-size:24px;margin-bottom:10px;}p{color:var(--muted);}button{padding:12px 26px;border:none;border-radius:var(--radius);background:linear-gradient(135deg,var(--primary),var(--secondary));color:white;font-weight:600;cursor:pointer;transition:all .25s ease;}button:hover{transform:translateY(-2px);box-shadow:var(--shadow-md);}`
+)
+
+/* =========================
+LAYOUT SYSTEM
+========================= */
+
+copyOrWrite(
+  "src/styles/layout.css",
+  path.resolve("../setup/templates/styles/layout.css"),
+  `.container{max-width:1200px;margin:auto;padding:0 20px;}section{width:100%;padding:120px 20px;animation:fadeUp .7s ease both;}.grid{display:grid;gap:30px;}.grid-2{grid-template-columns:repeat(auto-fit,minmax(300px,1fr));}.grid-3{grid-template-columns:repeat(auto-fit,minmax(260px,1fr));}.grid-4{grid-template-columns:repeat(auto-fit,minmax(220px,1fr));}.center{text-align:center;}.flex{display:flex;align-items:center;}.flex-between{display:flex;justify-content:space-between;align-items:center;}`
+)
+
+/* =========================
+UTILITY CLASSES
+========================= */
+
+copyOrWrite(
+  "src/styles/utils.css",
+  path.resolve("../setup/templates/styles/utils.css"),
+  `.mt-1{margin-top:10px}.mt-2{margin-top:20px}.mt-3{margin-top:30px}.mb-1{margin-bottom:10px}.mb-2{margin-bottom:20px}.mb-3{margin-bottom:30px}.p-1{padding:10px}.p-2{padding:20px}.p-3{padding:30px}.text-center{text-align:center}.card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:30px;transition:.25s;}.card:hover{transform:translateY(-5px);box-shadow:var(--shadow-md);}`
+)
+
+/* =========================
+ANIMATIONS
+========================= */
+
+write("src/styles/animations.css",`
+
+@keyframes fadeUp{
+
+ from{
+  opacity:0;
+  transform:translateY(30px);
+ }
+
+ to{
+  opacity:1;
+  transform:translateY(0);
+ }
+
+}
+
+@keyframes fadeIn{
+
+ from{
+  opacity:0;
+ }
+
+ to{
+  opacity:1;
+ }
+
+}
+
+@keyframes float{
+
+ 0%{transform:translateY(0)}
+ 50%{transform:translateY(-8px)}
+ 100%{transform:translateY(0)}
+
+}
+
+.float{
+ animation:float 4s ease-in-out infinite;
+}
+
+`)
+
+/* =========================
+NAVBAR
+========================= */
+
+write("src/styles/navbar.css",`
+
+.navbar{
+
+ width:100%;
+
+ display:flex;
+
+ justify-content:space-between;
+
+ align-items:center;
+
+ padding:20px 40px;
+
+ background:rgba(15,23,42,.7);
+
+ backdrop-filter:blur(12px);
+
+ border-bottom:1px solid var(--border);
+
+ position:sticky;
+
+ top:0;
+
+ z-index:100;
+
+}
+
+.logo{
+
+ display:flex;
+
+ align-items:center;
+
+ gap:10px;
+
+ font-size:20px;
+
+ font-weight:700;
+
+ color:var(--primary);
+
+}
+
+.navbar nav{
+
+ display:flex;
+
+ gap:28px;
+
+}
+
+.navbar a{
+
+ text-decoration:none;
+
+ color:var(--text);
+
+ font-weight:500;
+
+ position:relative;
+
+}
+
+.navbar a::after{
+
+ content:"";
+
+ position:absolute;
+
+ left:0;
+
+ bottom:-6px;
+
+ width:0;
+
+ height:2px;
+
+ background:var(--secondary);
+
+ transition:.25s;
+
+}
+
+.navbar a:hover::after{
+ width:100%;
+}
+
+`)
+
+/* =========================
+HERO
+========================= */
+
+write("src/styles/hero.css",`
+
+.hero{
+
+ max-width:900px;
+
+ margin:auto;
+
+ text-align:center;
+
+ padding:160px 20px;
+
+}
+
+.hero h1{
+
+ font-size:56px;
+
+ background:
+ linear-gradient(135deg,#6366f1,#22c55e);
+
+ -webkit-background-clip:text;
+ -webkit-text-fill-color:transparent;
+
+}
+
+.hero p{
+
+ font-size:20px;
+
+ margin-bottom:30px;
+
+}
+
+.hero button{
+ font-size:16px;
+}
+
+`)
+
+/* =========================
+FEATURES
+========================= */
+
+write("src/styles/features.css",`
+
+.features{
+
+ max-width:1100px;
+
+ margin:auto;
+
+ display:grid;
+
+ grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
+
+ gap:30px;
+
+}
+
+.features .card h3{
+ margin-bottom:10px;
+}
+
+`)
+
+/* =========================
+TESTIMONIALS
+========================= */
+
+write("src/styles/testimonials.css",`
+
+.testimonials{
+
+ max-width:1100px;
+
+ margin:auto;
+
+}
+
+.testimonials-grid{
+
+ display:grid;
+
+ grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
+
+ gap:30px;
+
+ margin-top:40px;
+
+}
+
+.testimonial{
+
+ background:var(--card);
+
+ border:1px solid var(--border);
+
+ border-radius:var(--radius);
+
+ padding:25px;
+
+}
+
+.testimonial span{
+
+ display:block;
+
+ margin-top:12px;
+
+ color:var(--secondary);
+
+}
+
+`)
+
+/* =========================
+PRICING
+========================= */
+
+write("src/styles/pricing.css",`
+
+.pricing{
+
+ max-width:1100px;
+
+ margin:auto;
+
+}
+
+.pricing-grid{
+
+ display:grid;
+
+ grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
+
+ gap:30px;
+
+ margin-top:40px;
+
+}
+
+.plan{
+
+ background:var(--card);
+
+ border:1px solid var(--border);
+
+ border-radius:var(--radius);
+
+ padding:35px;
+
+ text-align:center;
+
+ transition:.3s;
+
+}
+
+.plan:hover{
+
+ transform:scale(1.04);
+
+ box-shadow:var(--shadow-md);
+
+}
+
+.plan.popular{
+
+ border:2px solid var(--primary);
+
+}
+
+`)
+
+/* =========================
+BLOG
+========================= */
+
+write("src/styles/blog.css",`
+
+.blog{
+
+ max-width:1100px;
+
+ margin:auto;
+
+}
+
+.blog-grid{
+
+ display:grid;
+
+ grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
+
+ gap:30px;
+
+ margin-top:40px;
+
+}
+
+.post{
+
+ background:var(--card);
+
+ border:1px solid var(--border);
+
+ border-radius:var(--radius);
+
+ padding:25px;
+
+ transition:.25s;
+
+}
+
+.post:hover{
+
+ transform:translateY(-5px);
+
+}
+
+`)
+
+/* =========================
+ABOUT
+========================= */
+
+write("src/styles/about.css",`
+
+.about{
+
+ max-width:800px;
+
+ margin:auto;
+
+ text-align:center;
+
+}
+
+`)
+
+/* =========================
+PROJECTS
+========================= */
+
+write("src/styles/projects.css",`
+
+.projects{
+
+ max-width:1100px;
+
+ margin:auto;
+
+ text-align:center;
+
+}
+
+.projects p{
+ margin-top:10px;
+}
+
+`)
+
+/* =========================
+CONTACT
+========================= */
+
+write("src/styles/contact.css",`
+
+.contact{
+
+ max-width:700px;
+
+ margin:auto;
+
+ text-align:center;
+
+ background:var(--card);
+
+ border:1px solid var(--border);
+
+ border-radius:var(--radius);
+
+ padding:40px;
+
+}
+
+.contact p{
+ margin-top:10px;
+}
+
+`)
+
+/* =========================
+CTA
+========================= */
+
+write("src/styles/cta.css",`
+
+.cta{
+
+ text-align:center;
+
+ background:
+ linear-gradient(135deg,#6366f1,#22c55e);
+
+ padding:80px 40px;
+
+ border-radius:var(--radius);
+
+ max-width:900px;
+
+ margin:80px auto;
+
+ box-shadow:var(--shadow-lg);
+
+}
+
+.cta h2{
+ margin-bottom:20px;
+}
+
+`)
+
+/* =========================
+FOOTER
+========================= */
+
+write("src/styles/footer.css",`
+
+.footer{
+
+ padding:40px;
+
+ text-align:center;
+
+ border-top:1px solid var(--border);
+
+ margin-top:80px;
+
+ color:var(--muted);
+
+}
+
+`)
+
+/* =========================
+MOBILE NAVIGATION SYSTEM
+========================= */
+
+write("src/styles/mobile-navbar.css",`
+
+.mobile-toggle{
+
+ display:none;
+
+ cursor:pointer;
+
+ font-size:22px;
+
+}
+
+@media(max-width:768px){
+
+ .navbar{
+
+  flex-direction:column;
+
+  align-items:flex-start;
+
+ }
+
+ .navbar nav{
+
+  width:100%;
+
+  flex-direction:column;
+
+  gap:15px;
+
+  margin-top:15px;
+
+ }
+
+ .mobile-toggle{
+
+  display:block;
+
+ }
+
+}
+
+`)
+
+/* =========================
+GLASS UI COMPONENTS
+========================= */
+
+write("src/styles/glass.css",`
+
+.glass{
+
+ background:rgba(255,255,255,.05);
+
+ backdrop-filter:blur(10px);
+
+ border:1px solid var(--border);
+
+ border-radius:var(--radius);
+
+ box-shadow:var(--shadow-sm);
+
+}
+
+.glass:hover{
+
+ box-shadow:var(--shadow-md);
+
+}
+
+`)
+
+/* =========================
+GRADIENT BACKGROUNDS
+========================= */
+
+write("src/styles/gradients.css",`
+
+.gradient-primary{
+
+ background:
+ linear-gradient(135deg,#6366f1,#22c55e);
+
+}
+
+.gradient-secondary{
+
+ background:
+ linear-gradient(135deg,#22c55e,#0ea5e9);
+
+}
+
+.gradient-accent{
+
+ background:
+ linear-gradient(135deg,#f59e0b,#ef4444);
+
+}
+
+`)
+
+/* =========================
+HOVER INTERACTIONS
+========================= */
+
+write("src/styles/interactions.css",`
+
+.hover-lift{
+
+ transition:.25s;
+
+}
+
+.hover-lift:hover{
+
+ transform:translateY(-6px);
+
+ box-shadow:var(--shadow-md);
+
+}
+
+.hover-scale{
+
+ transition:.25s;
+
+}
+
+.hover-scale:hover{
+
+ transform:scale(1.05);
+
+}
+
+`)
+
+/* =========================
+ADVANCED ANIMATIONS
+========================= */
+
+write("src/styles/advanced-animations.css",`
+
+@keyframes slideUp{
+
+ from{
+
+  opacity:0;
+
+  transform:translateY(40px);
+
+ }
+
+ to{
+
+  opacity:1;
+
+  transform:translateY(0);
+
+ }
+
+}
+
+@keyframes slideLeft{
+
+ from{
+
+  opacity:0;
+
+  transform:translateX(-40px);
+
+ }
+
+ to{
+
+  opacity:1;
+
+  transform:translateX(0);
+
+ }
+
+}
+
+@keyframes slideRight{
+
+ from{
+
+  opacity:0;
+
+  transform:translateX(40px);
+
+ }
+
+ to{
+
+  opacity:1;
+
+  transform:translateX(0);
+
+ }
+
+}
+
+.slide-up{
+ animation:slideUp .7s ease both;
+}
+
+.slide-left{
+ animation:slideLeft .7s ease both;
+}
+
+.slide-right{
+ animation:slideRight .7s ease both;
+}
+
+`)
+
+/* =========================
+IMAGE STYLING
+========================= */
+
+write("src/styles/media.css",`
+
+img{
+
+ max-width:100%;
+
+ border-radius:var(--radius);
+
+}
+
+.image-card{
+
+ overflow:hidden;
+
+ border-radius:var(--radius);
+
+}
+
+.image-card img{
+
+ transition:.3s;
+
+}
+
+.image-card:hover img{
+
+ transform:scale(1.1);
+
+}
+
+`)
+
+/* =========================
+BLOG TYPOGRAPHY
+========================= */
+
+write("src/styles/blog-content.css",`
+
+.blog-content{
+
+ max-width:800px;
+
+ margin:auto;
+
+}
+
+.blog-content h1{
+
+ font-size:40px;
+
+ margin-bottom:20px;
+
+}
+
+.blog-content p{
+
+ margin-bottom:18px;
+
+ line-height:1.7;
+
+}
+
+.blog-content img{
+
+ margin:30px 0;
+
+}
+
+`)
+
+/* =========================
+SERVICES
+========================= */
+write("src/styles/services.css",`
+.services {
+  max-width:1100px;
+  margin:auto;
+  text-align:center;
+}
+.services .card {
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  padding:30px;
+  box-shadow:var(--shadow-sm);
+  transition:.25s;
+}
+.services .card:hover {
+  box-shadow:var(--shadow-md);
+  transform:scale(1.04);
+}
+`)
+/* =========================
+TEAM
+========================= */
+write("src/styles/team.css",`
+.team {
+  max-width:1100px;
+  margin:auto;
+  text-align:center;
+}
+.team .card {
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  padding:30px;
+  box-shadow:var(--shadow-sm);
+  transition:.25s;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+}
+.team .avatar {
+  width:80px;
+  height:80px;
+  border-radius:50%;
+  margin-bottom:12px;
+  object-fit:cover;
+  box-shadow:var(--shadow-sm);
+}
+.team .card:hover {
+  box-shadow:var(--shadow-md);
+  transform:translateY(-5px);
+}
+`)
+/* =========================
+CAREERS
+========================= */
+write("src/styles/careers.css",`
+.careers {
+  max-width:900px;
+  margin:auto;
+  text-align:center;
+}
+.careers .card {
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  padding:30px;
+  box-shadow:var(--shadow-sm);
+  transition:.25s;
+}
+.careers .card:hover {
+  box-shadow:var(--shadow-md);
+  transform:scale(1.04);
+}
+.careers button {
+  margin-top:16px;
+  background:var(--primary);
+  color:white;
+  border:none;
+  border-radius:var(--radius);
+  padding:10px 24px;
+  font-weight:600;
+  cursor:pointer;
+  transition:.2s;
+}
+.careers button:hover {
+  background:var(--secondary);
+  transform:translateY(-2px);
+}
+`)
+/* =========================
+PORTFOLIO
+========================= */
+write("src/styles/portfolio.css",`
+.portfolio {
+  max-width:1100px;
+  margin:auto;
+  text-align:center;
+}
+.portfolio .image-card {
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  overflow:hidden;
+  box-shadow:var(--shadow-sm);
+  margin-bottom:20px;
+  transition:.3s;
+}
+.portfolio .image-card img {
+  width:100%;
+  height:180px;
+  object-fit:cover;
+  border-radius:var(--radius);
+  transition:.3s;
+}
+.portfolio .image-card:hover img {
+  transform:scale(1.08);
+}
+.portfolio .image-card h3 {
+  margin:12px 0 6px 0;
+  color:var(--primary);
+}
+.portfolio .image-card p {
+  color:var(--muted);
+}
+`)
+
+console.log("Full advanced CSS design system generated")
+
+FILE: setup/06-docs.js
+========================================
+const fs=require("fs")
+const path=require("path")
+const project=process.argv[2]
+
+const docs=path.join(project,"docs")
+if(!fs.existsSync(docs)) fs.mkdirSync(docs)
+
+fs.writeFileSync(path.join(docs,"AI_INSTRUCTIONS.md"),`
+Rules for AI:
+
+1 Modify only necessary files
+2 Preserve architecture
+3 Do not rewrite whole project
+4 Keep components modular
+`.trim())
+
+fs.writeFileSync(path.join(docs,"DEPENDENCIES.txt"),`
+React
+Vite
+TypeScript
+React Router
+Axios
+Framer Motion
+React Helmet
+Styled Components
+Classnames
+React Icons
+@emotion/react
+@emotion/styled
+date-fns
+uuid
+`.trim())
+
+fs.writeFileSync(path.join(docs,"ARCHITECTURE.md"),`
+Architecture Principles
+
+Component-based architecture
+Each UI section is built as an independent component.
+
+Pages Layer
+src/pages contains page-level compositions:
+- Home
+- About
+- Pricing
+- Projects
+- Blog
+- Contact
+- Services
+- Team
+- Careers
+- Portfolio
+- NotFound
+
+Components Layer
+src/components holds reusable UI components:
+- Navbar
+- Hero
+- Features
+- Testimonials
+- Pricing
+- Blog
+- About
+- Projects
+- Contact
+- CTA
+- Footer
+- Services
+- Team
+- Careers
+- Portfolio
+
+Hooks
+Reusable logic is stored in src/hooks.
+
+Services
+API logic and external communication lives in src/services.
+
+Utils
+Utility helper functions live in src/utils.
+
+Types
+Shared TypeScript interfaces live in src/types.
+
+Styles
+Global and component styles live in src/styles.
+
+Assets
+Images, graphics, and media live in src/assets and src/graphics.
+
+Animations
+Reusable animation logic and styles live in src/animations.
+
+Data
+Static and dynamic data lives in src/data.
+`.trim())
+
+console.log("Docs generated for full agency, portfolio, SaaS, and blog system")
+
+FILE: setup/07-ai-context.js
+========================================
+const fs = require("fs")
+const path = require("path")
+
+const project = process.argv[2]
+
+process.chdir(project)
+
+function detectTech(){
+
+ const pkg = JSON.parse(fs.readFileSync("package.json"))
+
+ const deps = Object.keys(pkg.dependencies || {})
+
+ let tech=[]
+
+ if(deps.includes("react")) tech.push("React")
+ if(deps.includes("axios")) tech.push("Axios")
+ if(deps.includes("react-router-dom")) tech.push("React Router")
+ if(deps.includes("framer-motion")) tech.push("Framer Motion")
+ if(deps.includes("react-helmet")) tech.push("React Helmet")
+ if(deps.includes("styled-components")) tech.push("Styled Components")
+ if(deps.includes("react-icons")) tech.push("React Icons")
+ if(deps.includes("@emotion/react")) tech.push("Emotion")
+ if(deps.includes("date-fns")) tech.push("date-fns")
+
+ return tech.join(", ")
+
+}
+
+function tree(dir,depth=0){
+
+ let out=""
+
+ const files=fs.readdirSync(dir)
+
+ for(const f of files){
+
+  if(f==="node_modules" || f===".git" || f==="dist" || f==="build" || f===".vite") continue
+  const full=path.join(dir,f)
+  const stat=fs.statSync(full)
+  out+=`${" ".repeat(depth*2)}- ${f}\n`
+  if(stat.isDirectory()){
+   out+=tree(full,depth+1)
+  }
+
+ }
+
+ return out
+
+}
+
+const treeOutput=tree(process.cwd())
+const tech=detectTech()
+fs.writeFileSync("docs/PROJECT_CONTEXT.md",`
+AI DEVELOPMENT CONTEXT
+
+TECH STACK
+====================
+${tech}
+
+PROJECT TREE
+====================
+${treeOutput}
+`.trim())
+console.log("AI context created for full agency, portfolio, SaaS, and blog system")
+
+FILE: setup/08-analyzer.js
+========================================
+const fs = require("fs")
+const path = require("path")
+
+const project = process.argv[2]
+
+let empty=[]
+let largeFiles=[]
+
+function scan(dir){
+
+ const files=fs.readdirSync(dir)
+
+ for(const f of files){
+
+  if(f==="node_modules" || f===".git" || f==="dist" || f==="build" || f===".vite") continue
+
+  const full=path.join(dir,f)
+  const stat=fs.statSync(full)
+
+  if(stat.isDirectory()){
+   scan(full)
+  }
+
+  else{
+
+   if(stat.size===0){
+    empty.push(full)
+   }
+
+   if(stat.size > 15000){
+    largeFiles.push(full)
+   }
+
+  }
+
+ }
+
+}
+
+scan(project)
+
+let report="EMPTY FILES\n"
+report+=empty.join("\n")
+report+="\n\nLARGE FILES\n"
+report+=largeFiles.join("\n")
+fs.writeFileSync(path.join(project,"docs","PROJECT_REPORT.md"),report)
+console.log("Project analyzed for full agency, portfolio, SaaS, and blog system")
+
+FILE: setup/09-verify.js
+========================================
+const fs=require("fs")
+const project=process.argv[2]
+
+if(!fs.existsSync(project+"/package.json")) throw new Error("package.json missing")
+if(!fs.existsSync(project+"/src")) throw new Error("src missing")
+
+const requiredFolders = [
+  "src/pages",
+  "src/components",
+  "src/styles",
+  "src/router",
+  "src/portfolio",
+  "src/services",
+  "src/team",
+  "src/careers",
+  "src/assets",
+  "src/data",
+  "src/graphics",
+  "src/animations"
+]
+for(const folder of requiredFolders){
+  if(!fs.existsSync(project+"/"+folder)) throw new Error(`${folder} missing`)
+}
+console.log("Project verified for full agency, portfolio, SaaS, and blog system")
+
+
+FILE: setup/10-refactor-analysis.js
+========================================
+const fs=require("fs")
+const path=require("path")
+const project=process.argv[2]
+
+let suggestions=[
+  "Remove unused components and pages",
+  "Check for duplicate logic and repeated code",
+  "Review and optimize imports",
+  "Split large components into smaller ones",
+  "Use hooks for reusable logic",
+  "Optimize CSS for modularity and performance",
+  "Ensure accessibility (a11y) in all UI",
+  "Add type annotations for all functions and props",
+  "Use lazy loading for images and routes",
+  "Document all custom hooks and services",
+  "Refactor for mobile and responsive design",
+  "Review SEO meta tags and Open Graph data",
+  "Use animation libraries for smooth transitions",
+  "Remove dead code and legacy files",
+  "Organize assets and data for scalability"
+]
+
+fs.writeFileSync(path.join(project,"docs","REFACTOR_SUGGESTIONS.md"),suggestions.join("\n"))
+
+console.log("Deep refactor analysis added for large, modern codebase")
+
+
+FILE: setup/11-add-context-command.js
+========================================
+const fs = require("fs")
+
+const project = process.argv[2]
+
+process.chdir(project)
+
+/*
+Ensure scripts folder exists
+*/
+
+if (!fs.existsSync("scripts")) {
+ fs.mkdirSync("scripts")
+}
+
+/*
+Create repo context generator
+*/
+
+const script = [
+  'const fs=require("fs")',
+  'const path=require("path")',
+  'const ROOT=process.cwd()',
+  'const OUTPUT="PROJECT_CONTEXT.txt"',
+  'const IGNORE=[',
+  '  "node_modules",".git","dist","build",".vite","PROJECT_CONTEXT.txt"',
+  ']',
+  'function ignore(p){',
+  '  return IGNORE.some(i=>p.includes(i))',
+  '}',
+  'function rel(p){',
+  '  return path.relative(ROOT,p)',
+  '}',
+  'function tree(dir,depth=0){',
+  '  let out=""',
+  '  const items=fs.readdirSync(dir)',
+  '  for(const item of items){',
+  '    const full=path.join(dir,item)',
+  '    if(ignore(full)) continue',
+  '    const stat=fs.statSync(full)',
+  '    out+=`${" ".repeat(depth*2)}- ${item}\n`',
+  '    if(stat.isDirectory()){',
+  '      out+=tree(full,depth+1)',
+  '    }',
+  '  }',
+  '  return out',
+  '}',
+  'function scan(dir){',
+  '  let out=""',
+  '  const items=fs.readdirSync(dir)',
+  '  for(const item of items){',
+  '    const full=path.join(dir,item)',
+  '    if(ignore(full)) continue',
+  '    const stat=fs.statSync(full)',
+  '    if(stat.isDirectory()){',
+  '      out+=scan(full)',
+  '    }',
+  '    else if(/\.(ts|tsx|js|css|html|md|json)$/.test(full)){',
+  '      const code=fs.readFileSync(full,"utf8")',
+  '      out+=`\nFILE: ${rel(full)}\n`',
+  '      out+="-----------------------\n"',
+  '      out+=code+"\n"',
+  '    }',
+  '    else if(/\.(svg|jpg|png)$/.test(full)){',
+  '      out+=`\nFILE: ${rel(full)}\n`',
+  '      out+="-----------------------\n"',
+  '      out+="[binary file]\n"',
+  '    }',
+  '  }',
+  '  return out',
+  '}',
+  'let output=""',
+  'output+="AI DEVELOPMENT CONTEXT\n\n"',
+  'output+="PROJECT TREE\n"',
+  'output+="====================\n"',
+  'output+=tree(ROOT)',
+  'output+="\nSOURCE CODE\n"',
+  'output+="====================\n"',
+  'output+=scan(ROOT)',
+  'fs.writeFileSync(OUTPUT,output)',
+  'console.log("PROJECT_CONTEXT.txt generated for full agency, portfolio, SaaS, and blog system")'
+].join('\n');
+
+fs.writeFileSync("scripts/repo-context.cjs", script)
+
+/*
+Read existing package.json
+*/
+
+const pkgPath = "package.json"
+
+const pkg = JSON.parse(fs.readFileSync(pkgPath))
+
+/*
+Ensure scripts object exists
+*/
+
+pkg.scripts = pkg.scripts || {}
+
+/*
+Add context command only if missing
+*/
+
+if(!pkg.scripts.context){
+ pkg.scripts.context = "node scripts/repo-context.cjs"
+}
+
+/*
+Write updated package.json back
+*/
+
+fs.writeFileSync(pkgPath, JSON.stringify(pkg, null, 2))
+
+console.log("Context command installed")
+
+FILE: setup/12-export-setup-code.js
+========================================
+const fs = require("fs")
+const path = require("path")
+
+const ROOT = process.cwd()
+const SETUP_DIR = path.join(ROOT, "setup")
+const DOCS_DIR = path.join(ROOT, "docs")
+const OUTPUT = path.join(DOCS_DIR, "SETUP_ENGINE_CODE.txt")
+
+if(!fs.existsSync(DOCS_DIR)){
+ fs.mkdirSync(DOCS_DIR)
+}
+
+function scan(dir){
+
+ let out=""
+
+ const files=fs.readdirSync(dir)
+
+ files.forEach(file=>{
+
+  const full=path.join(dir,file)
+
+  const stat=fs.statSync(full)
+
+  if(stat.isDirectory()){
+   out+=scan(full)
+  }
+
+  else if(file.endsWith(".js") || file.endsWith(".ts") || file.endsWith(".tsx") || file.endsWith(".css") || file.endsWith(".md") || file.endsWith(".json")){
+   const code=fs.readFileSync(full,"utf8")
+   out+=`\nFILE: ${path.relative(ROOT,full)}\n`
+   out+="========================================\n"
+   out+=code+"\n"
+  }
+
+ })
+
+ return out
+
+}
+
+let content=""
+
+content+="AI SETUP ENGINE SOURCE CODE\n\n"
+
+content+=scan(SETUP_DIR)
+
+fs.writeFileSync(OUTPUT,content)
+
+console.log("Setup engine code exported for full agency, portfolio, SaaS, and blog system")
+
+FILE: setup/config.js
+========================================
+module.exports = {
+  defaultProjectName: "portfolio",
+  dependencies: [
+    "react-router-dom",
+    "axios"
+  ],
+  structure: [
+    "src/components/Navbar",
+    "src/components/Hero",
+    "src/components/Features",
+    "src/components/Testimonials",
+    "src/components/Pricing",
+    "src/components/Blog",
+    "src/components/About",
+    "src/components/Projects",
+    "src/components/Contact",
+    "src/components/CTA",
+    "src/components/Footer",
+    "src/components/Services",
+    "src/components/Team",
+    "src/components/Careers",
+    "src/components/Portfolio",
+    "src/pages",
+    "src/pages/Home",
+    "src/pages/About",
+    "src/pages/Pricing",
+    "src/pages/Projects",
+    "src/pages/Blog",
+    "src/pages/Contact",
+    "src/pages/Services",
+    "src/pages/Team",
+    "src/pages/Careers",
+    "src/pages/Portfolio",
+    "src/pages/NotFound",
+    "src/styles",
+    "src/styles/global.css",
+    "src/styles/layout.css",
+    "src/styles/utils.css",
+    "src/styles/animations.css",
+    "src/styles/advanced-animations.css",
+    "src/styles/glass.css",
+    "src/styles/gradients.css",
+    "src/styles/interactions.css",
+    "src/styles/media.css",
+    "src/styles/blog-content.css",
+    "src/styles/services.css",
+    "src/styles/team.css",
+    "src/styles/careers.css",
+    "src/styles/portfolio.css",
+    "src/router",
+    "src/hooks",
+    "src/services",
+    "src/utils",
+    "src/types",
+    "src/assets",
+    "src/data",
+    "src/graphics",
+    "src/animations"
+  ]
+}
+
+FILE: setup/lib/context.js
+========================================
+const fs=require("fs")
+
+function ensureDir(dir){
+ if(!fs.existsSync(dir)){
+  fs.mkdirSync(dir,{recursive:true})
+ }
+}
+
+function writeIfMissing(file,content){
+ if(!fs.existsSync(file)){
+  fs.writeFileSync(file,content.trim())
+ }
+}
+
+module.exports={
+ ensureDir,
+ writeIfMissing
+}
+
+FILE: setup/lib/logger.js
+========================================
+function log(step,msg){
+ console.log(`[${step}] ${msg}`)
+}
+
+module.exports={log}
+
+FILE: setup/run.js
+========================================
+const fs=require("fs")
+const path=require("path")
+const {execSync}=require("child_process")
+const readline=require("readline")
+const config=require("./config")
+
+const rl=readline.createInterface({
+ input:process.stdin,
+ output:process.stdout
+})
+
+rl.question(`Enter project name (default: ${config.defaultProjectName}): `,(name)=>{
+
+ const project=name && name.trim()?name.trim():config.defaultProjectName
+
+ if(!fs.existsSync(project)){
+
+  console.log("Creating project:",project)
+
+  execSync(`npm create vite@latest ${project} -- --template react-ts`,{stdio:"inherit"})
+
+  execSync(`cd ${project} && npm install`,{stdio:"inherit"})
+
+ }else{
+
+  console.log("Project exists. Skipping creation.")
+
+ }
+
+ const scripts=fs.readdirSync(__dirname)
+ .filter(f=>/^\d+.*\.js$/.test(f))
+ .sort()
+
+ scripts.forEach(s=>{
+  try{
+   console.log("Running",s)
+   execSync(`node ${path.join(__dirname,s)} ${project}`,{stdio:"inherit"})
+  }catch(err){
+   console.error("Error running:",s)
+  }
+ })
+
+ console.log("Setup complete")
+ console.log(`cd ${project}`)
+ console.log("npm run dev")
+
+ rl.close()
+
+})

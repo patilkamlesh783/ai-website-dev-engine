@@ -20,6 +20,9 @@ const extraDependencies = [
 
 const allDeps = config.dependencies.concat(extraDependencies)
 
-execSync(`npm install ${allDeps.join(" ")}`, {stdio: "inherit"})
-
-log("DEPENDENCIES", "All dependencies installed (UI, animation, SEO, icons, utils)")
+try {
+  execSync(`npm install ${allDeps.join(" ")}`, {stdio: "inherit"})
+  log("DEPENDENCIES", "All dependencies installed (UI, animation, SEO, icons, utils)")
+} catch (err) {
+  log("DEPENDENCIES", `Error installing dependencies: ${err.message}`)
+}

@@ -8,11 +8,42 @@ const project = process.argv[2]
 
 process.chdir(project)
 
-config.structure.forEach(dir=>{
- ensureDir(dir)
-})
+try {
+  config.structure.forEach(dir => {
+    ensureDir(dir)
+  })
+} catch (err) {
+  log("STRUCTURE", `Error creating structure: ${err.message}`)
+}
 
-ensureDir("docs")
+try {
+  ensureDir("docs")
+} catch (err) {
+  log("STRUCTURE", `Error creating docs folder: ${err.message}`)
+}
+
+// Ensure all folders required by verification
+const verifyFolders = [
+  "src/pages",
+  "src/components",
+  "src/styles",
+  "src/router",
+  "src/portfolio",
+  "src/services",
+  "src/team",
+  "src/careers",
+  "src/assets",
+  "src/data",
+  "src/graphics",
+  "src/animations"
+]
+verifyFolders.forEach(folder => {
+  try {
+    ensureDir(folder)
+  } catch (err) {
+    log("STRUCTURE", `Error creating folder ${folder}: ${err.message}`)
+  }
+})
 
 const letter = project.charAt(0).toUpperCase()
 
@@ -23,6 +54,11 @@ const svg = `
 </svg>
 `
 
-fs.writeFileSync("public/logo.svg",svg)
+try {
+  ensureDir("public")
+  fs.writeFileSync("public/logo.svg", svg)
+} catch (err) {
+  log("STRUCTURE", `Error writing logo.svg: ${err.message}`)
+}
 
 log("STRUCTURE","Architecture generated")
